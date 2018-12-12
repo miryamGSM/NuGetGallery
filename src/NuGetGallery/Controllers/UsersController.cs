@@ -483,7 +483,7 @@ namespace NuGetGallery
                 .ToList();
 
             var unlistedPackages = packages
-                .Where(p => !p.Listed || p.Available)
+                .Where(p => !p.Listed || !p.Available)
                 .ToList();
 
             // find all received ownership requests
