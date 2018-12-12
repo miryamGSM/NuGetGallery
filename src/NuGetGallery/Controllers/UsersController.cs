@@ -473,16 +473,17 @@ namespace NuGetGallery
 
             var wasAADLoginOrMultiFactorAuthenticated = User.WasMultiFactorAuthenticated() || User.WasAzureActiveDirectoryAccountUsedForSignin();
 
-            var packages = PackageService.FindPackagesByAnyMatchingOwner(currentUser, includeUnlisted: true);
+            var packages = PackageService.FindPackagesByAnyMatchingOwner(currentUser, includeUnlisted: true)
+                .Select(p => new ListPackageItemRequiredSignerViewModel(p, currentUser, SecurityPolicyService, wasAADLoginOrMultiFactorAuthenticated))
+                .ToList()
+                .OrderBy(p => p.Id);
+
             var listedPackages = packages
-                .Where(p => p.Listed && p.PackageStatusKey == PackageStatus.Available)
-                .Select(p => new ListPackageItemRequiredSignerViewModel(p, currentUser, SecurityPolicyService, wasAADLoginOrMultiFactorAuthenticated))
-                .OrderBy(p => p.Id)
+                .Where(p => p.Listed && p.Available)
                 .ToList();
+
             var unlistedPackages = packages
-                .Where(p => !p.Listed || p.PackageStatusKey != PackageStatus.Available)
-                .Select(p => new ListPackageItemRequiredSignerViewModel(p, currentUser, SecurityPolicyService, wasAADLoginOrMultiFactorAuthenticated))
-                .OrderBy(p => p.Id)
+                .Where(p => !p.Listed || p.Available)
                 .ToList();
 
             // find all received ownership requests
